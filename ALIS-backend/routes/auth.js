@@ -1,31 +1,40 @@
+// ALIS-backend/routes/auth.js
 import express from "express";
 import admin from "../config/firebaseAdmin.js";
 
 const router = express.Router();
 
-// ---------------- REGISTER ----------------
+// register using Firebase Admin (server-side)
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ success: false, error: "email & password required" });
 
     const user = await admin.auth().createUser({
       email,
       password,
-      displayName: name
+      displayName: name || ""
     });
 
-    return res.json({ success: true, uid: user.uid });
+    return res.json({ success: true, uid: user.uid, email: user.email });
   } catch (err) {
-    return res.status(400).json({ success: false, error: err.message });
+    console.error("Register error:", err);
+    return res.status(400).json({ success: false, error: err.message || "Register failed" });
   }
 });
 
-// ---------------- LOGIN ----------------
-router.post("/login", async (req, res) => {
-  return res.json({
-    success: false,
-    error: "Login requires Firebase Client SDK. Use frontend login."
-  });
+// verify ID token (client should send Bearer token)
+router.post("/verify-token", async (req, res) => {
+  try {
+    const token = req.body.idToken || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
+    if (!token) return res.status(400).json({ success: false, error: "No token provided" });
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    return res.json({ success: true, decoded });
+  } catch (err) {
+    console.error("Verify token error:", err);
+    return res.status(401).json({ success: false, error: "Invalid token" });
+  }
 });
 
 export default router;
