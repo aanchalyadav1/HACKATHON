@@ -1,20 +1,16 @@
-import { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 const UICtx = createContext();
-export const useUI = () => useContext(UICtx);
 
-export default function UIProvider({children}){
-  const [toast,setToast] = useState(null);
+export function useUI() {
+  return useContext(UICtx);
+}
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(()=>setToast(null),2000);
-  };
-
-  const [modal,setModal] = useState(null);
+export default function UIProvider({ children }) {
+  const [toast, setToast] = useState(null);
 
   return (
-    <UICtx.Provider value={{toast,showToast,modal,setModal}}>
+    <UICtx.Provider value={{ toast, setToast }}>
       {children}
     </UICtx.Provider>
   );
