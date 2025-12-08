@@ -1,11 +1,15 @@
-import admin from 'firebase-admin';
-import { readFileSync } from 'fs';
+import admin from "firebase-admin";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-});
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: process.env.FIREBASE_BUCKET
+  });
+}
 
 export default admin;
