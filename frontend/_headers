@@ -1,0 +1,7 @@
+/*
+  Content-Security-Policy:
+    default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
+    font-src https://fonts.gstatic.com data:;
+    style-src https://fonts.googleapis.com 'unsafe-inline';
+    img-src * data: blob:;
+    connect-src *;
