@@ -1,14 +1,20 @@
-export function parallaxEffect(element, intensity = 0.03) {
-  window.addEventListener('mousemove', (e) => {
-    const x = (window.innerWidth / 2 - e.clientX) * intensity;
-    const y = (window.innerHeight / 2 - e.clientY) * intensity;
-    element.style.transform = `translate(${x}px, ${y}px)`;
-  });
-}
+export function initParallax() {
+  window.addEventListener("scroll", () => {
+    const scrollY = window.scrollY;
 
-export function applyParallaxToBackground(){
-  window.addEventListener('scroll', ()=>{
-    const scrollY = window.scrollY * 0.15;
-    document.body.style.backgroundPositionY = `-${scrollY}px`;
+    document.documentElement.style.setProperty(
+      "--pY-slow",
+      scrollY * 0.1 + "px"
+    );
+
+    document.documentElement.style.setProperty(
+      "--pY-mid",
+      scrollY * 0.2 + "px"
+    );
+
+    document.documentElement.style.setProperty(
+      "--pY-fast",
+      scrollY * 0.35 + "px"
+    );
   });
 }
