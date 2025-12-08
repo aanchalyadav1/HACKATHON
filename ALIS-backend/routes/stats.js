@@ -1,12 +1,14 @@
+// ALIS-backend/routes/stats.js
 import express from "express";
-
 const router = express.Router();
 
 router.get("/stats", async (req, res) => {
+  // Replace with real DB queries when ready
   return res.json({
-    activeSessions: 4,
-    uploadedSlips: 3,
-    typicalLoanRange: "₹5k - ₹1L"
+    sessions: 0,
+    uploads: 0,
+    typicalLoanRange: "₹5k+",
+    note: "Mock stats — replace with DB when ready"
   });
 });
 
