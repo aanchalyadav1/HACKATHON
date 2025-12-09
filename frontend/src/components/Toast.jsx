@@ -1,7 +1,8 @@
-export default function Toast({message}) {
+import React from 'react';
+export default function Toast({ text }) {
   return (
-    <div className='fixed bottom-5 right-5 bg-blue-600 text-white px-4 py-2 rounded shadow-lg animate-pulse'>
-      {message}
+    <div style={{position:'fixed', right:20, top:20, zIndex:9999}}>
+      <div className="card p-3" style={{background:'rgba(0,0,0,0.6)'}}>{text}</div>
     </div>
   );
 }
