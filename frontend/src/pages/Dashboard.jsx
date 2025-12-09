@@ -1,43 +1,31 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { getStats } from '../utils/api';
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+export default function Dashboard(){
+  const [stats, setStats] = useState({ sessions:0, uploads:0 });
+  const [series, setSeries] = useState([]);
 
-export default function Dashboard() {
-  const [stats, setStats] = useState({ sessions: 0, uploads: 0 });
-
-  useEffect(() => {
-    axios
-      .get(`${API_BASE}/api/admin/stats`)
-      .then((r) => setStats(r.data))
-      .catch(() => {});
+  useEffect(()=>{
+    getStats().then(s => { if(s) setStats(s); }).catch(()=>{});
+    setSeries([{name:'Day 1', value:5},{name:'Day 2', value:8},{name:'Day 3', value:6},{name:'Day 4', value:10}]);
   }, []);
 
   return (
-    <div className="page container mx-auto px-6">
-      <motion.h1
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-4xl text-white font-semibold mb-6"
-      >
-        Dashboard
-      </motion.h1>
+    <div className="container">
+      <h2>Dashboard</h2>
+      <div className="mt-4 grid grid-cols-3 gap-4">
+        <div className="card p-4"> <div style={{fontWeight:800,fontSize:22}}>{stats.sessions}</div><div style={{color:'var(--muted)'}}>Active Sessions</div></div>
+        <div className="card p-4"> <div style={{fontWeight:800,fontSize:22}}>{stats.uploads}</div><div style={{color:'var(--muted)'}}>Uploaded Salary Slips</div></div>
+        <div className="card p-4"> <div style={{fontWeight:800,fontSize:22}}>₹5k+</div><div style={{color:'var(--muted)'}}>Typical Loan Range</div></div>
+      </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="card">
-          <div className="text-4xl text-white">{stats.sessions}</div>
-          <p className="text-white/70">Active Sessions</p>
-        </div>
-
-        <div className="card">
-          <div className="text-4xl text-white">{stats.uploads}</div>
-          <p className="text-white/70">Uploaded Salary Slips</p>
-        </div>
-
-        <div className="card">
-          <div className="text-4xl text-white">₹5k+</div>
-          <p className="text-white/70">Typical Loan Range</p>
+      <div className="card mt-6 p-4">
+        <h4>Usage</h4>
+        <div style={{height:240}}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={series}><XAxis dataKey="name"/><YAxis/><Tooltip/><Line type="monotone" dataKey="value" stroke="#00d4ff" strokeWidth={3} /></LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
