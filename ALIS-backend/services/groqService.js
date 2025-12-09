@@ -1,45 +1,50 @@
-// ALIS-backend/services/groqService.js
+// services/groqService.js
 import fetch from "node-fetch";
 
 export async function groqChat(message) {
-  try {
-    // MODEL CHOICE: mixtral-8x7b-32768 is robust; change if your Groq console recommends another
-    const model = process.env.GROQ_MODEL || "mixtral-8x7b-32768";
+  const API_KEY = process.env.GROQ_API_KEY;
+  const MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant"; // safe free-tier
+  const API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-    const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  if (!API_KEY) {
+    return "Groq Error: Missing GROQ_API_KEY";
+  }
+
+  try {
+    const payload = {
+      model: MODEL,
+      messages: [{ role: "user", content: message }]
+    };
+
+    const resp = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+        Authorization: `Bearer ${API_KEY}`,
       },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: "You are ALIS — a concise, professional Indian loan underwriting assistant." },
-          { role: "user", content: message }
-        ],
-        temperature: 0.3,
-        max_tokens: 400
-      })
+      body: JSON.stringify(payload),
     });
 
-    const data = await resp.json();
-    console.log("🔵 GROQ RAW RESPONSE:", JSON.stringify(data));
+    const text = await resp.text();
 
-    if (data?.error) {
-      console.error("Groq returned error:", data.error);
-      return `Groq error: ${data.error.message || "unknown"}`;
+    console.log("🔵 GROQ RAW RESPONSE:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return "Groq Error: Invalid JSON response";
     }
 
-    // extract reply safely
-    const reply =
-      data?.choices?.[0]?.message?.content ||
-      data?.choices?.[0]?.delta?.content ||
-      (typeof data === "string" ? data : null);
+    if (data.error) {
+      console.error("Groq error:", data.error.message);
+      return `Groq Error: ${data.error.message}`;
+    }
 
-    return reply || "No response";
+    const content = data?.choices?.[0]?.message?.content;
+    return content || "No response";
   } catch (err) {
-    console.error("GroqChat Error:", err);
-    return "Error contacting Groq.";
+    console.error("Groq exception:", err);
+    return "Groq Error: Network issue";
   }
 }
