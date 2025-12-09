@@ -1,194 +1,79 @@
-/* ==============================
-   Tailwind Base
-============================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ==============================
-   Global Font
-============================== */
+/* custom vars */
+:root {
+  --bg: #05060a;
+  --muted: rgba(255,255,255,0.65);
+  --glass: rgba(255,255,255,0.03);
+  --neon: #00d4ff;
+  --accent: #8b5cf6;
+}
+
+/* reset & body */
+html,body,#root { height:100% }
 body {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
-
-  /* Vars modified in backgroundController.js */
-  --alis-bg-overlay-opacity: 0.35;
-  --alis-bg-brightness: 0.92;
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: radial-gradient(circle at 10% 10%, rgba(0,212,255,0.03), transparent), var(--bg);
+  color: #e6eef8;
+  margin:0;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
 }
 
-/* ==============================
-   GLOBAL BACKGROUND LAYERS
-   (Overlay, Tint, Brightness)
-============================== */
+/* container */
+.container { max-width:1100px; margin:0 auto; padding:28px; }
 
-/* Dark translucent overlay for readability */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: rgba(0, 0, 0, var(--alis-bg-overlay-opacity));
-  pointer-events: none;
-}
-
-/* Brightness / contrast correction layer */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  backdrop-filter: brightness(var(--alis-bg-brightness)) saturate(1.1);
-  pointer-events: none;
-}
-
-/* ==============================
-   PAGE WRAPPERS
-============================== */
-.page {
-  min-height: 100vh;
-  width: 100%;
-  padding-top: 6rem;
-  position: relative;
-}
-
-/* Smooth fade when switching pages */
-.fade-enter {
-  opacity: 0;
-  transform: translateY(12px);
-}
-.fade-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 400ms ease, transform 400ms ease;
-}
-
-/* ==============================
-   GLASS SURFACES
-============================== */
-.glass {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(14px) brightness(1.1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  padding: 1rem;
-}
-
-.glass-heavy {
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(18px) brightness(1.15);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-}
-
-/* ==============================
-   CARDS
-============================== */
+/* card */
 .card {
-  @apply glass p-6 rounded-2xl shadow-xl;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border-radius:14px; padding:18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.03);
 }
 
-.card-hero {
-  @apply glass-heavy p-8 rounded-3xl shadow-2xl;
-}
-
-/* ==============================
-   BUTTONS
-============================== */
+/* buttons */
 .btn {
-  @apply px-5 py-2 rounded-xl font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-all duration-300;
+  background: linear-gradient(90deg, var(--neon), var(--accent));
+  color: #071018;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight:700;
 }
-
 .btn-ghost {
-  @apply px-5 py-2 rounded-xl border border-white/40 text-white hover:bg-white/10 transition-all duration-300;
+  background: transparent;
+  border:1px solid rgba(255,255,255,0.04);
+  padding:8px 10px; border-radius:8px;
 }
 
-/* Floating glowing neon effect */
-.btn-glow {
-  box-shadow: 0 0 14px rgba(0, 179, 255, 0.55);
-}
+/* hero */
+.hero-title { font-size:36px; font-weight:800; letter-spacing:-0.8px; }
+.hero-lead { color:var(--muted); margin-top:12px; }
 
-/* ==============================
-   INPUTS
-============================== */
-.input {
-  @apply w-full px-4 py-2 rounded-xl bg-white/10 border border-white/30 text-white outline-none;
-}
-
-/* ==============================
-   CHAT WINDOW
-============================== */
+/* chat */
 .chat-window {
-  height: 68vh;
-  overflow-y: auto;
-  padding-right: 4px;
+  height:60vh; max-height:720px;
+  padding:18px;
+  border-radius:14px;
+  overflow:auto;
+  background: linear-gradient(180deg, rgba(10,12,18,0.7), rgba(8,9,12,0.5));
+  backdrop-filter: blur(8px);
 }
+.msg-bubble { padding:12px 14px; border-radius:12px; margin:8px 0; max-width:86%; white-space:pre-wrap; word-break:break-word; }
+.msg-user { background: linear-gradient(90deg, var(--neon), var(--accent)); color:#041018; align-self:flex-end; }
+.msg-bot { background: rgba(255,255,255,0.02); color:#dfeeff; }
 
-/* message bubbles */
-.msg {
-  margin-bottom: 12px;
-}
+/* input */
+.input { flex:1; padding:10px 12px; border-radius:999px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.02); color:inherit; outline:none; }
 
-.msg-bubble {
-  padding: 0.7rem 1rem;
-  border-radius: 12px;
-  color: white;
-}
+/* small helpers */
+.mt-4 { margin-top:16px }
+.w-80 { width:320px }
 
-.msg-user {
-  background: rgba(0, 160, 255, 0.3);
-  backdrop-filter: blur(4px);
-}
-
-.msg-bot {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* agent label above bubbles */
-.agent-tag {
-  font-size: 0.7rem;
-  opacity: 0.6;
-  margin-bottom: 4px;
-}
-
-/* ==============================
-   PARALLAX LAYERS
-============================== */
-.parallax {
-  position: relative;
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-/* used by parallax.js */
-[data-parallax-speed="slow"] { transform: translateY(var(--pY-slow, 0px)); }
-[data-parallax-speed="mid"] { transform: translateY(var(--pY-mid, 0px)); }
-[data-parallax-speed="fast"] { transform: translateY(var(--pY-fast, 0px)); }
-
-/* ==============================
-   NEON GLOW DECORATIONS
-============================== */
-.neon-soft {
-  box-shadow: 0 0 35px rgba(0, 153, 255, 0.45);
-}
-
-.neon-strong {
-  box-shadow: 0 0 55px rgba(0, 170, 255, 0.75);
-}
-
-/* ==============================
-   LOADER SPINNER
-============================== */
-.loader {
-  width: 34px;
-  height: 34px;
-  border: 4px solid rgba(255, 255, 255, 0.25);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* responsive */
+@media (max-width:900px) {
+  .hero-title { font-size:26px; }
+  .chat-window { height:55vh; }
 }
