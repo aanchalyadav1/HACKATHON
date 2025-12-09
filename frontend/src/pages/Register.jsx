@@ -1,32 +1,32 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { fadeUp } from "../animations/motionVariants";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
-export default function Register() {
+export default function Register(){
+  const [name,setName] = useState(''); const [email,setEmail] = useState(''); const [password,setPassword] = useState('');
+  const nav = useNavigate();
+
+  async function handleRegister(e){
+    e.preventDefault();
+    try{
+      await createUserWithEmailAndPassword(auth, email, password);
+      nav('/chat');
+    }catch(err){
+      alert('Registration failed: ' + err.message);
+    }
+  }
+
   return (
-    <div className="page container mx-auto px-6">
-      <motion.div
-        variants={fadeUp}
-        initial="hidden"
-        animate="show"
-        className="glass max-w-md mx-auto p-8 rounded-3xl"
-      >
-        <h1 className="text-3xl text-white font-bold mb-6">Register</h1>
-
-        <input className="input mb-4" placeholder="Your Name" />
-        <input className="input mb-4" placeholder="Email" type="email" />
-        <input className="input mb-4" placeholder="Password" type="password" />
-
-        <button className="btn w-full">Create Account</button>
-
-        <p className="text-white/70 mt-4 text-center">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-400 hover:underline">
-            Login
-          </Link>
-        </p>
-      </motion.div>
+    <div className="container" style={{display:'flex',justifyContent:'center'}}>
+      <form onSubmit={handleRegister} className="card p-6" style={{width:420}}>
+        <h3>Create account</h3>
+        <input className="input mt-4" placeholder="Full name" value={name} onChange={e=>setName(e.target.value)} />
+        <input className="input mt-4" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} />
+        <input className="input mt-4" placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} />
+        <div className="mt-4" />
+        <button className="btn" type="submit">Create Account</button>
+      </form>
     </div>
   );
 }
