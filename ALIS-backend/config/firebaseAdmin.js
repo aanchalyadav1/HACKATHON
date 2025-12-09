@@ -1,35 +1,29 @@
-// ALIS-backend/config/firebaseAdmin.js
+// config/firebaseAdmin.js
 import admin from "firebase-admin";
-import dotenv from "dotenv";
 
-dotenv.config();
+let serviceJson = process.env.FIREBASE_SERVICE_ACCOUNT;
 
-let serviceAccount = null;
-if (process.env.FIREBASE_ADMIN_JSON) {
-  try {
-    serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_JSON);
-  } catch (err) {
-    console.error("Failed to parse FIREBASE_ADMIN_JSON:", err.message);
-    serviceAccount = null;
-  }
+if (!serviceJson) {
+  throw new Error("❌ Missing FIREBASE_SERVICE_ACCOUNT environment variable!");
 }
 
-if (!admin.apps.length) {
-  if (serviceAccount && Object.keys(serviceAccount).length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_BUCKET || "visioncoders-a4b62.appspot.com"
-    });
-    console.log("Firebase Admin initialized (service account).");
-  } else {
-    // initialize app without cert - some operations will fail
-    try {
-      admin.initializeApp();
-      console.log("Firebase Admin initialized without service account (limited).");
-    } catch (e) {
-      console.error("Firebase init failed:", e.message);
-    }
-  }
+// IMPORTANT: Replace escaped newlines (\n) inside the private key
+// If your private_key is properly escaped, this will fix formatting
+serviceJson = serviceJson.replace(/\\n/g, "\n");
+
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(serviceJson);
+} catch (err) {
+  console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", err);
+  throw err;
 }
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET, // ex: visioncoders-a4b62.appspot.com
+});
+
+console.log("✅ Firebase Admin initialized successfully");
 
 export default admin;
