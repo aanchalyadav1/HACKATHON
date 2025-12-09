@@ -4,26 +4,26 @@ import admin from "../config/firebaseAdmin.js";
 
 const router = express.Router();
 
-// register using Firebase Admin (server-side)
+// Register (create user via Firebase Admin)
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!email || !password) return res.status(400).json({ success: false, error: "email & password required" });
 
-    const user = await admin.auth().createUser({
+    const userRecord = await admin.auth().createUser({
       email,
       password,
       displayName: name || ""
     });
 
-    return res.json({ success: true, uid: user.uid, email: user.email });
+    return res.json({ success: true, uid: userRecord.uid, email: userRecord.email });
   } catch (err) {
-    console.error("Register error:", err);
+    console.error("Auth register error:", err);
     return res.status(400).json({ success: false, error: err.message || "Register failed" });
   }
 });
 
-// verify ID token (client should send Bearer token)
+// verify token (server-side helper)
 router.post("/verify-token", async (req, res) => {
   try {
     const token = req.body.idToken || (req.headers.authorization && req.headers.authorization.split(" ")[1]);
