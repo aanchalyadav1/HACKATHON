@@ -1,4 +1,4 @@
-// ALIS-backend/routes/chat.js
+// routes/chat.js
 import express from "express";
 import { groqChat } from "../services/groqService.js";
 
@@ -6,20 +6,26 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { message, sessionId, user } = req.body || {};
-    if (!message || !message.trim()) return res.status(400).json({ success: false, reply: "message required" });
+    const message = req.body.message || "";
+    if (!message.trim()) {
+      return res.status(400).json({ success: false, error: "Message required" });
+    }
 
     const reply = await groqChat(message);
 
     return res.json({
       success: true,
-      reply,
       agent: "ALIS",
-      sessionId: sessionId || Date.now().toString()
+      sessionId: Date.now().toString(),
+      reply,
     });
   } catch (err) {
-    console.error("Chat error:", err);
-    return res.status(500).json({ success: false, reply: "Server error" });
+    console.error("Chat route error:", err);
+    return res.status(500).json({
+      success: false,
+      agent: "ALIS",
+      reply: "Server error",
+    });
   }
 });
 
