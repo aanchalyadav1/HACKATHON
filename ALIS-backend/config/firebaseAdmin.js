@@ -4,25 +4,32 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-let serviceAccount = {};
-if (process.env.FIREBASE_ADMIN_KEY) {
+let serviceAccount = null;
+if (process.env.FIREBASE_ADMIN_JSON) {
   try {
-    serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
-  } catch (e) {
-    console.error("Failed parsing FIREBASE_ADMIN_KEY:", e.message);
-    serviceAccount = {};
+    serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_JSON);
+  } catch (err) {
+    console.error("Failed to parse FIREBASE_ADMIN_JSON:", err.message);
+    serviceAccount = null;
   }
 }
 
 if (!admin.apps.length) {
-  const initOptions = serviceAccount && Object.keys(serviceAccount).length
-    ? {
-        credential: admin.credential.cert(serviceAccount),
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_BUCKET || "visioncoders-a4b62.appspot.com",
-      }
-    : {}; // allow local dev without admin key (but many features will fail)
-
-  admin.initializeApp(initOptions);
+  if (serviceAccount && Object.keys(serviceAccount).length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || process.env.FIREBASE_BUCKET || "visioncoders-a4b62.appspot.com"
+    });
+    console.log("Firebase Admin initialized (service account).");
+  } else {
+    // initialize app without cert - some operations will fail
+    try {
+      admin.initializeApp();
+      console.log("Firebase Admin initialized without service account (limited).");
+    } catch (e) {
+      console.error("Firebase init failed:", e.message);
+    }
+  }
 }
 
 export default admin;
