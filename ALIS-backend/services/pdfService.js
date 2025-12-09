@@ -1,26 +1,25 @@
 // ALIS-backend/services/pdfService.js
 import PDFDocument from "pdfkit";
 
-export function generateSanctionPDF({ name = "Applicant", amount = "₹0", plan = "N/A", date = new Date().toLocaleDateString() } = {}) {
+export function generateSanctionPDF({ name = "Applicant", amount = "₹0", plan = "Standard", date = new Date().toLocaleDateString() } = {}) {
   const doc = new PDFDocument({ size: "A4", margin: 50 });
-  const buffers = [];
-  doc.on("data", buffers.push.bind(buffers));
-  doc.on("end", () => {});
+  const chunks = [];
+  doc.on("data", (chunk) => chunks.push(chunk));
+  doc.on("end", () => { /* finished */ });
 
-  // Header
-  doc.fontSize(20).text("VisionCoders — Sanction Letter", { align: "center" });
-  doc.moveDown(1.2);
-
+  doc.fontSize(18).text("VisionCoders — Sanction Letter", { align: "center" });
+  doc.moveDown();
   doc.fontSize(12).text(`Date: ${date}`);
   doc.moveDown();
 
   doc.fontSize(14).text(`To: ${name}`);
-  doc.moveDown();
+  doc.moveDown(0.5);
 
-  doc.fontSize(12).text(`This letter confirms that the loan application has been evaluated and a provisional sanction is issued for ${amount}.`);
-  doc.moveDown();
-  doc.text(`Plan: ${plan}`);
-  doc.moveDown();
+  doc.fontSize(12).text(`This letter confirms a provisional sanction of ${amount} under plan ${plan}. Please supply any pending documents for final disbursal.`);
+  doc.moveDown(1);
+
+  doc.text("Terms & conditions apply.", { continued: false });
+  doc.moveDown(2);
 
   doc.text("Regards,");
   doc.text("VisionCoders — ALIS Team");
@@ -29,9 +28,9 @@ export function generateSanctionPDF({ name = "Applicant", amount = "₹0", plan 
 
   return new Promise((resolve, reject) => {
     doc.on("end", () => {
-      const pdfData = Buffer.concat(buffers);
+      const pdfData = Buffer.concat(chunks);
       resolve(pdfData);
     });
-    doc.on("error", reject);
+    doc.on("error", (err) => reject(err));
   });
-                     }
+}
