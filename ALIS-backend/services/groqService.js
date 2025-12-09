@@ -1,48 +1,45 @@
+// ALIS-backend/services/groqService.js
 import fetch from "node-fetch";
 
-export async function groqChat(userMessage) {
+export async function groqChat(message) {
   try {
-    const systemPrompt = `
-You are ALIS — a professional Indian loan-underwriting assistant.
-You ALWAYS reply in short, clean, structured bullet points.
-
-RULES:
-- Max 4–6 bullet points per answer.
-- Avoid long paragraphs.
-- Keep answers crisp and actionable.
-- Tone must be professional & simple.
-- Do NOT give global loan info, only India-focused.
-- If user asks something unclear, ask for EXACT information, but briefly.
-
-FORMAT:
-**Title**
-- point
-- point
-- point
-    `;
+    // MODEL CHOICE: mixtral-8x7b-32768 is robust; change if your Groq console recommends another
+    const model = process.env.GROQ_MODEL || "mixtral-8x7b-32768";
 
     const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model,
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userMessage }
+          { role: "system", content: "You are ALIS — a concise, professional Indian loan underwriting assistant." },
+          { role: "user", content: message }
         ],
-        max_tokens: 350,
-        temperature: 0.4
+        temperature: 0.3,
+        max_tokens: 400
       })
     });
 
     const data = await resp.json();
-    return data?.choices?.[0]?.message?.content || "No response";
+    console.log("🔵 GROQ RAW RESPONSE:", JSON.stringify(data));
 
+    if (data?.error) {
+      console.error("Groq returned error:", data.error);
+      return `Groq error: ${data.error.message || "unknown"}`;
+    }
+
+    // extract reply safely
+    const reply =
+      data?.choices?.[0]?.message?.content ||
+      data?.choices?.[0]?.delta?.content ||
+      (typeof data === "string" ? data : null);
+
+    return reply || "No response";
   } catch (err) {
-    console.error("Groq error:", err);
-    return "Something went wrong. Please try again.";
+    console.error("GroqChat Error:", err);
+    return "Error contacting Groq.";
   }
 }
