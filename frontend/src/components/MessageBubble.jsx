@@ -1,10 +1,12 @@
-export default function MessageBubble({ from, text, agent }) {
+// src/components/MessageBubble.jsx
+import React from "react";
+
+export default function MessageBubble({ from = "bot", text }) {
+  const cls = from === "user" ? "msg user" : "msg bot";
   return (
-    <div className={from==='user'?'text-right':'text-left'}>
-      <div className={'inline-block px-4 py-2 rounded-lg '+(from==='user'?'bg-blue-600':'bg-gray-800')}>
-        {agent && <div className='text-xs opacity-60'>{agent}</div>}
-        <div>{text}</div>
-      </div>
+    <div className={cls}>
+      {from === "bot" && <div style={{fontSize:".72rem", color:"#9fb7d7", marginBottom:6}}>ALIS</div>}
+      <div style={{whiteSpace: "pre-wrap"}}>{text}</div>
     </div>
-  )
+  );
 }
