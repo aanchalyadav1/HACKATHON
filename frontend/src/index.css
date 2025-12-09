@@ -77,3 +77,35 @@ body {
   .hero-title { font-size:26px; }
   .chat-window { height:55vh; }
 }
+.card-hero {
+  padding: 20px;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(14px);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: 0.35s;
+}
+
+.card-hero:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.08);
+}
+
+.neon-soft {
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.25);
+}
+
+.btn-glow {
+  background: linear-gradient(90deg, #00d4ff, #0077ff);
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.4);
+  color: #041018;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: 0.3s;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 24px rgba(0, 212, 255, 0.6);
+  transform: translateY(-3px);
+}
