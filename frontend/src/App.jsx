@@ -14,21 +14,19 @@ import { setPageBackground } from './utils/backgroundController';
 export default function App(){
   const loc = useLocation();
 
-  useEffect(()=>{
-    setPageBackground(loc.pathname);
-  }, [loc.pathname]);
+  useEffect(()=>{ setPageBackground(loc.pathname); }, [loc.pathname]);
 
   return (
     <AuthProvider>
       <UIProvider>
         <Navbar />
         <Routes>
-          <Route path='/' element={<Landing />} />
-          <Route path='/chat' element={<Chat />} />
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/about' element={<About />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<Register />} />
+          <Route path='/' element={<Landing/>} />
+          <Route path='/chat' element={<Chat/>} />
+          <Route path='/dashboard' element={<Dashboard/>} />
+          <Route path='/about' element={<About/>} />
+          <Route path='/login' element={<Login/>} />
+          <Route path='/register' element={<Register/>} />
         </Routes>
       </UIProvider>
     </AuthProvider>
