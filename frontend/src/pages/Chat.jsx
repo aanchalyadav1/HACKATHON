@@ -1,75 +1,76 @@
 // src/pages/Chat.jsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
+import ChatInput from "../components/ChatInput"; // adjust path if needed
 import MessageBubble from "../components/MessageBubble";
-import ChatInput from "../components/ChatInput";
 import QuickActions from "../components/QuickActions";
-import { motion } from "framer-motion";
+import { setPageBackground } from "../utils/backgroundController";
 
-export default function Chat(){
+export default function Chat() {
+  useEffect(() => {
+    setPageBackground("/chat");
+  }, []);
+
   const [messages, setMessages] = useState([
-    { id:1, from:"bot", text:"Welcome to ALIS. Ask about loans, upload salary slip, or type PAN." }
+    { id: 1, from: "ALIS", text: "Welcome to ALIS. Ask about loans, upload salary slip, or type PAN." }
   ]);
-  const [loading, setLoading] = useState(false);
-  const boxRef = useRef();
 
-  useEffect(()=>{
-    // scroll to bottom
-    boxRef.current?.scrollTo({ top: boxRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, loading]);
-
-  async function sendMessage(text){
-    const userMsg = { id: Date.now()+1, from: "user", text };
-    setMessages(m=>[...m, userMsg]);
-    setLoading(true);
-
+  // placeholder send handler — replace with your API call
+  async function handleSend(text) {
+    // push user's message locally
+    setMessages((m) => [...m, { id: Date.now(), from: "User", text }]);
+    // call API and push reply (example)
     try {
       const res = await fetch("/api/chat", {
-        method:"POST",
-        headers:{ "Content-Type": "application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text })
       });
       const data = await res.json();
-      const reply = data?.reply || "No response";
-      setMessages(m => [...m, { id: Date.now()+2, from: "bot", text: reply }]);
+      setMessages((m) => [...m, { id: Date.now() + 1, from: "ALIS", text: data.reply || "No response" }]);
     } catch (e) {
-      setMessages(m => [...m, { id: Date.now()+2, from: "bot", text: "Something went wrong while contacting the agent." }]);
-    } finally {
-      setLoading(false);
+      setMessages((m) => [...m, { id: Date.now() + 1, from: "ALIS", text: "Error contacting server" }]);
     }
   }
 
-  const demoLoan = () => sendMessage("type: loan / PAN ABXXXX1234 / salary 40000 / sanction");
-  const demoPAN = () => sendMessage("What's a PAN? show example ABCPD1234F");
-  const upload = () => alert("Upload UI not implemented in this small package — your existing upload endpoint will work here.");
-
   return (
-    <div className="page container-page relative px-4 py-6">
-      <h2 className="text-3xl font-bold mb-6">AI Chat</h2>
+    <div className="page relative overflow-hidden">
+      <div className="container mx-auto px-6 pt-10 max-w-4xl">
+        <h1 className="text-3xl font-bold text-white mb-4">AI Chat</h1>
 
-      <div className="chat-shell">
-        <div className="glass p-4">
-          <div className="messages" ref={boxRef}>
-            {messages.map(m => <MessageBubble key={m.id} from={m.from} text={m.text} />)}
-            {loading && <div className="msg bot">ALIS is typing…</div>}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Chat column */}
+          <div className="md:col-span-2">
+            <div className="bg-black/40 rounded-xl p-4 h-[60vh] overflow-y-auto">
+              {messages.map((m) => (
+                <MessageBubble key={m.id} from={m.from} text={m.text} />
+              ))}
+            </div>
+
+            <div className="mt-4">
+              <ChatInput onSend={handleSend} />
+            </div>
           </div>
 
-          <div className="mt-4">
-            <ChatInput onSend={sendMessage} />
-          </div>
-        </div>
+          {/* Right column: quick actions & tips */}
+          <div className="md:col-span-1">
+            <div className="bg-black/40 rounded-xl p-4 mb-4">
+              <h3 className="text-sm text-white/80">Quick Actions</h3>
+              <QuickActions />
+            </div>
 
-        <div>
-          <QuickActions onDemoLoan={demoLoan} onDemoPAN={demoPAN} onUpload={upload} />
-          <div className="glass p-4 mt-4 neon-soft">
-            <div className="text-sm text-white/70">Tips</div>
-            <ul className="text-white/60 mt-2 text-sm">
-              <li>• Use `type: loan / PAN <PAN> / salary <amount>` for quick flow.</li>
-              <li>• Upload a salary slip to get underwrite suggestions.</li>
-              <li>• Click Demo Loan to see a sample sanction flow.</li>
-            </ul>
+            <div className="bg-black/30 rounded-xl p-4">
+              <div className="text-sm text-white/70">Tips</div>
+
+              {/* IMPORTANT: use &lt; &gt; or <code> to avoid JSX parsing */}
+              <ul className="text-white/60 mt-2 text-sm list-inside list-disc space-y-1">
+                <li>Use <code>type: loan / PAN &lt;PAN&gt; / salary &lt;amount&gt;</code> for quick flow.</li>
+                <li>Upload a salary slip to get underwrite suggestions.</li>
+                <li>Click Demo Loan to see a sample sanction flow.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-        }
+}
