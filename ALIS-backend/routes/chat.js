@@ -4,45 +4,22 @@ import { groqChat } from "../services/groqService.js";
 
 const router = express.Router();
 
-// POST /api/chat
 router.post("/", async (req, res) => {
   try {
     const { message, sessionId, user } = req.body || {};
+    if (!message || !message.trim()) return res.status(400).json({ success: false, reply: "message required" });
 
-    if (!message || message.trim().length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: "Message is required",
-      });
-    }
-
-    // If GROQ key missing → safe fallback
-    if (!process.env.GROQ_API_KEY) {
-      return res.json({
-        success: true,
-        reply: "No response",
-        agent: "ALIS",
-      });
-    }
-
-    // Call Groq Llama model
-    const replyText = await groqChat(message);
+    const reply = await groqChat(message);
 
     return res.json({
       success: true,
-      reply: replyText,
+      reply,
       agent: "ALIS",
-      sessionId: sessionId || Date.now().toString(),
-      user,
+      sessionId: sessionId || Date.now().toString()
     });
   } catch (err) {
     console.error("Chat error:", err);
-
-    return res.status(500).json({
-      success: false,
-      reply: "Error processing message",
-      agent: "ALIS",
-    });
+    return res.status(500).json({ success: false, reply: "Server error" });
   }
 });
 
