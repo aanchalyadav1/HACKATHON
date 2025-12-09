@@ -1,29 +1,26 @@
-// config/firebaseAdmin.js
 import admin from "firebase-admin";
 
-let serviceJson = process.env.FIREBASE_SERVICE_ACCOUNT;
-
-if (!serviceJson) {
-  throw new Error("❌ Missing FIREBASE_SERVICE_ACCOUNT environment variable!");
-}
-
-// IMPORTANT: Replace escaped newlines (\n) inside the private key
-// If your private_key is properly escaped, this will fix formatting
-serviceJson = serviceJson.replace(/\\n/g, "\n");
-
 let serviceAccount;
-try {
-  serviceAccount = JSON.parse(serviceJson);
-} catch (err) {
-  console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", err);
-  throw err;
+
+// Prefer Base64 method (mobile/tablet safe)
+if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+  const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, "base64").toString("utf8");
+  serviceAccount = JSON.parse(decoded);
+}
+// Fallback to raw JSON method
+else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  const fixed = process.env.FIREBASE_SERVICE_ACCOUNT.replace(/\\n/g, "\n");
+  serviceAccount = JSON.parse(fixed);
+} 
+else {
+  throw new Error("❌ No Firebase Admin credentials found.");
 }
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET, // ex: visioncoders-a4b62.appspot.com
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
 });
 
-console.log("✅ Firebase Admin initialized successfully");
+console.log("✅ Firebase Admin initialized");
 
 export default admin;
