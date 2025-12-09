@@ -1,103 +1,48 @@
+// src/pages/Landing.jsx
 import React from "react";
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { fadeUp, fadeIn, staggerChildren } from "../animations/motionVariants";
+import { motion } from "framer-motion";
 
-export default function Landing() {
+export default function Landing(){
   const nav = useNavigate();
 
   return (
-    <div className="page relative overflow-hidden">
-
-      {/* PARALLAX BG */}
-      <motion.div
-        className="absolute top-0 left-0 w-full h-full opacity-40 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.4 }}
-        transition={{ duration: 1.2 }}
-      >
-        <img
-          src="/br/hero_knight_bg.jpg"
-          alt="hero background"
-          className="w-full h-full object-cover"
-        />
-      </motion.div>
-
-      {/* DARK GRADIENT TINT */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/10 pointer-events-none"></div>
-
-      {/* CONTENT */}
-      <div className="relative z-10 container mx-auto px-6 pt-20">
-        <motion.div
-          variants={staggerChildren}
-          initial="hidden"
-          animate="show"
-          className="max-w-3xl"
+    <div className="page container-page px-4 py-16">
+      <div className="max-w-3xl">
+        <motion.h1
+          initial={{ y: 18, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.05 }}
+          className="text-4xl md:text-6xl font-bold leading-tight"
         >
-          <motion.h1
-            variants={fadeUp}
-            className="text-5xl md:text-6xl font-bold text-white drop-shadow-2xl leading-tight"
-          >
-            ALIS — <span className="text-blue-400">Agentic Loan</span>
-            <br />
-            Intelligence System
-          </motion.h1>
+          ALIS — <span style={{background:"linear-gradient(90deg,#00C2FF,#7b6bff)", WebkitBackgroundClip:"text", color:"transparent"}}>Agentic Loan</span>
+          <br/> Intelligence System
+        </motion.h1>
 
-          <motion.p
-            variants={fadeUp}
-            className="text-lg text-white/80 mt-4 max-w-xl"
-          >
-            AI-powered multi-agent system for instant verification, underwriting,
-            loan scoring, and sanction letter generation — built for India’s
-            micro-retail lending.
-          </motion.p>
+        <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.15}} className="mt-4 text-white/75">
+          AI-powered multi-agent orchestration for fast verification, practical underwriting,
+          and downloadable sanction letters — purpose-built for India’s micro & retail lending.
+        </motion.p>
 
-          {/* CTA BUTTONS */}
-          <motion.div variants={fadeUp} className="flex gap-4 mt-6">
-            <button className="btn btn-glow" onClick={() => nav("/chat")}>
-              Start AI Chat
-            </button>
-
-            <button className="btn-ghost" onClick={() => nav("/about")}>
-              Learn More
-            </button>
-          </motion.div>
+        <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.25}} className="flex gap-4 mt-8">
+          <button className="btn-glow" onClick={()=>nav('/chat')}>Start AI Chat</button>
+          <button className="btn-ghost" onClick={()=>nav('/about')}>Learn More</button>
         </motion.div>
+      </div>
 
-        {/* FEATURES */}
-        <motion.div
-          variants={fadeIn}
-          initial="hidden"
-          animate="show"
-          className="grid md:grid-cols-3 gap-6 mt-16"
-        >
-          <motion.div className="card-hero neon-soft" variants={fadeUp}>
-            <h3 className="text-xl font-semibold text-white mb-2">
-              ⚡ Fast Verification
-            </h3>
-            <p className="text-white/70">
-              PAN & salary slip verification in seconds using modern pipelines.
-            </p>
-          </motion.div>
-
-          <motion.div className="card-hero neon-soft" variants={fadeUp}>
-            <h3 className="text-xl font-semibold text-white mb-2">
-              🤖 Smart Underwriting
-            </h3>
-            <p className="text-white/70">
-              Custom scoring tuned for Indian salary norms and MSME needs.
-            </p>
-          </motion.div>
-
-          <motion.div className="card-hero neon-soft" variants={fadeUp}>
-            <h3 className="text-xl font-semibold text-white mb-2">
-              📄 Instant Sanction Letters
-            </h3>
-            <p className="text-white/70">
-              Download branded sanction letters with one click.
-            </p>
-          </motion.div>
-        </motion.div>
+      <div className="grid md:grid-cols-3 gap-6 mt-16">
+        <div className="card-hero neon-soft">
+          <h3 className="font-semibold text-lg">⚡ Fast Verification</h3>
+          <p className="text-white/70 mt-2">PAN & salary slip verification in seconds using multi-agent pipelines.</p>
+        </div>
+        <div className="card-hero neon-soft">
+          <h3 className="font-semibold text-lg">🤖 Smart Underwriting</h3>
+          <p className="text-white/70 mt-2">Scoring tuned for Indian salary ranges and MSME needs.</p>
+        </div>
+        <div className="card-hero neon-soft">
+          <h3 className="font-semibold text-lg">📄 Sanction Letters</h3>
+          <p className="text-white/70 mt-2">Download branded sanction PDFs instantly for approvals & records.</p>
+        </div>
       </div>
     </div>
   );
