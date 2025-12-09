@@ -3,9 +3,8 @@ import express from "express";
 import cors from "cors";
 import fileUpload from "express-fileupload";
 import dotenv from "dotenv";
-import path from "path";
 
-import admin from "./config/firebaseAdmin.js";
+import admin from "./config/firebaseAdmin.js"; // ensures firebase admin initialized
 
 import authRoute from "./routes/auth.js";
 import chatRoute from "./routes/chat.js";
@@ -16,31 +15,26 @@ import statsRoute from "./routes/stats.js";
 dotenv.config();
 const app = express();
 
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
+app.use(cors({
+  origin: "*",
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"]
+}));
 app.use(express.json({ limit: "12mb" }));
 app.use(express.urlencoded({ extended: true, limit: "12mb" }));
+app.use(fileUpload({
+  limits: { fileSize: 50 * 1024 * 1024 },
+  createParentPath: true
+}));
 
-app.use(
-  fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
-    createParentPath: true,
-  })
-);
-
+// Mount API routes
 app.use("/api/auth", authRoute);
 app.use("/api/chat", chatRoute);
 app.use("/api/upload-salary", uploadRoute);
 app.use("/api/sanction", sanctionRoute);
 app.use("/api/admin", statsRoute);
 
-// health-check
+// Health check
 app.get("/", (req, res) => res.send("Backend API is running successfully."));
 
 // 404
@@ -48,7 +42,7 @@ app.use((req, res) => res.status(404).json({ success: false, error: "Not Found" 
 
 // error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack || err);
+  console.error("Unhandled error:", err.stack || err);
   res.status(err.status || 500).json({ success: false, error: err.message || "Internal Server Error" });
 });
 
