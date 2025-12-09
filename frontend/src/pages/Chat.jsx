@@ -1,97 +1,75 @@
-import React, { useEffect, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import TypingIndicator from '../components/TypingIndicator';
-import { sendChat, uploadSalary } from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+// src/pages/Chat.jsx
+import React, { useEffect, useRef, useState } from "react";
+import MessageBubble from "../components/MessageBubble";
+import ChatInput from "../components/ChatInput";
+import QuickActions from "../components/QuickActions";
+import { motion } from "framer-motion";
 
 export default function Chat(){
-  const [messages, setMessages] = useState([{ from:'bot', agent:'ALIS', text:'Welcome to ALIS. Ask about loans, upload salary slip, or type PAN.' }]);
-  const [input, setInput] = useState('');
-  const [sessionId, setSessionId] = useState(null);
-  const [typing, setTyping] = useState(false);
-  const { user } = useAuth() || {};
-  const chatRef = useRef();
+  const [messages, setMessages] = useState([
+    { id:1, from:"bot", text:"Welcome to ALIS. Ask about loans, upload salary slip, or type PAN." }
+  ]);
+  const [loading, setLoading] = useState(false);
+  const boxRef = useRef();
 
-  useEffect(()=>{ chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior:'smooth' }); }, [messages]);
+  useEffect(()=>{
+    // scroll to bottom
+    boxRef.current?.scrollTo({ top: boxRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, loading]);
 
-  function push(m){ setMessages(s=>[...s,m]); }
+  async function sendMessage(text){
+    const userMsg = { id: Date.now()+1, from: "user", text };
+    setMessages(m=>[...m, userMsg]);
+    setLoading(true);
 
-  async function sendMsg(){
-    if(!input.trim()) return;
-    const txt = input.trim();
-    push({ from:'user', text: txt });
-    setInput('');
-    setTyping(true);
-
-    try{
-      const resp = await sendChat(txt, sessionId, user || {name:'Guest'});
-      if(resp.sessionId) setSessionId(resp.sessionId);
-      if(resp.reply) push({ from:'bot', agent: resp.agent || 'ALIS', text: resp.reply });
-      else push({ from:'bot', text:'No response' });
-    }catch(err){
-      console.error(err);
-      push({ from:'bot', text:'Error processing request.' });
-    } finally { setTyping(false); }
-  }
-
-  async function handleUpload(e){
-    const f = e.target.files?.[0];
-    if(!f) return;
-    push({ from:'user', text:`Uploaded ${f.name}`});
-    try{
-      const r = await uploadSalary(f);
-      push({ from:'bot', agent:'VerificationAgent', text: r.message || 'Salary uploaded.' });
-    }catch(e){
-      push({ from:'bot', text:'Upload failed.'});
+    try {
+      const res = await fetch("/api/chat", {
+        method:"POST",
+        headers:{ "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      const reply = data?.reply || "No response";
+      setMessages(m => [...m, { id: Date.now()+2, from: "bot", text: reply }]);
+    } catch (e) {
+      setMessages(m => [...m, { id: Date.now()+2, from: "bot", text: "Something went wrong while contacting the agent." }]);
+    } finally {
+      setLoading(false);
     }
   }
 
+  const demoLoan = () => sendMessage("type: loan / PAN ABXXXX1234 / salary 40000 / sanction");
+  const demoPAN = () => sendMessage("What's a PAN? show example ABCPD1234F");
+  const upload = () => alert("Upload UI not implemented in this small package — your existing upload endpoint will work here.");
+
   return (
-    <div className="container">
-      <div className="card">
-        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-          <h2 style={{margin:0}}>AI Chat</h2>
-          <div style={{color:'var(--muted)'}}>User: {user?.name || 'Guest'}</div>
-        </div>
+    <div className="page container-page relative px-4 py-6">
+      <h2 className="text-3xl font-bold mb-6">AI Chat</h2>
 
-        <div className="mt-4" style={{display:'flex', gap:20}}>
-          <div style={{flex:1}}>
-            <div className="chat-window" ref={chatRef}>
-              <div style={{display:'flex', flexDirection:'column'}}>
-                {messages.map((m,i) => (
-                  <div key={i} style={{display:'flex', flexDirection:'column', alignItems: m.from==='user' ? 'flex-end' : 'flex-start'}}>
-                    <div className={`msg-bubble ${m.from==='user' ? 'msg-user' : 'msg-bot'}`} style={{maxWidth:'84%'}}>
-                      {m.agent && <div style={{fontSize:11, color:'var(--muted)', marginBottom:6}}>{m.agent}</div>}
-                      <ReactMarkdown>{m.text}</ReactMarkdown>
-                    </div>
-                  </div>
-                ))}
-                {typing && <div style={{display:'flex'}}><div className="msg-bot msg-bubble"><TypingIndicator /></div></div>}
-              </div>
-            </div>
-
-            <div className="mt-4" style={{display:'flex', gap:10}}>
-              <input className="input" value={input} onChange={e=>setInput(e.target.value)} placeholder="Type: loan / PAN ABCDE1234F / salary 50000 / sanction" />
-              <button className="btn" onClick={sendMsg}>Send</button>
-            </div>
+      <div className="chat-shell">
+        <div className="glass p-4">
+          <div className="messages" ref={boxRef}>
+            {messages.map(m => <MessageBubble key={m.id} from={m.from} text={m.text} />)}
+            {loading && <div className="msg bot">ALIS is typing…</div>}
           </div>
 
-          <aside className="w-80">
-            <div className="card">
-              <h4 style={{margin:0}}>Quick Actions</h4>
-              <div style={{marginTop:12, display:'flex', flexDirection:'column', gap:10}}>
-                <button className="btn" onClick={()=>setInput('I want a loan')}>Demo Loan</button>
-                <button className="btn" onClick={()=>setInput('PAN ABCDE1234F')}>Demo PAN</button>
-                <label className="btn btn-ghost" style={{cursor:'pointer', display:'inline-block', textAlign:'center'}}>
-                  Upload Salary
-                  <input type="file" onChange={handleUpload} style={{display:'none'}} />
-                </label>
-                <button className="btn-ghost" onClick={()=>setInput('sanction sample')}>Download Sanction</button>
-              </div>
-            </div>
-          </aside>
+          <div className="mt-4">
+            <ChatInput onSend={sendMessage} />
+          </div>
+        </div>
+
+        <div>
+          <QuickActions onDemoLoan={demoLoan} onDemoPAN={demoPAN} onUpload={upload} />
+          <div className="glass p-4 mt-4 neon-soft">
+            <div className="text-sm text-white/70">Tips</div>
+            <ul className="text-white/60 mt-2 text-sm">
+              <li>• Use `type: loan / PAN <PAN> / salary <amount>` for quick flow.</li>
+              <li>• Upload a salary slip to get underwrite suggestions.</li>
+              <li>• Click Demo Loan to see a sample sanction flow.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+        }
